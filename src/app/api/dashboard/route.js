@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getMockDashboardData } from "@/lib/mockData";
 import { computeAllAnalytics } from "@/lib/analytics";
 import { refreshAccessToken } from "@/lib/spotify";
 
@@ -73,13 +72,8 @@ function applyCookies(response, cookieList) {
   }
 }
 
-/**
- * Return mock data with isMock flag.
- */
-function mockResponse() {
-  const mockData = getMockDashboardData();
-  mockData.isMock = true;
-  return NextResponse.json(mockData);
+function errorResponse(message, status = 401) {
+  return NextResponse.json({ error: true, message }, { status });
 }
 
 export async function GET(request) {
@@ -109,7 +103,7 @@ export async function GET(request) {
 
     if (!accessToken) {
       console.error("No Spotify access token available in /api/dashboard. Cannot fetch user data.");
-      return mockResponse();
+      return errorResponse("Missing Spotify access token. Ensure the callback stored cookies correctly.", 401);
     }
 
     // ── Test the token by fetching profile ──
@@ -131,12 +125,14 @@ export async function GET(request) {
       }
     }
 
-    // ── Still failing? Log full response body and fall back to mock ──
+    // ── Still failing? Log full response body and return an explicit error ──
     if (!profileRes.ok) {
       const bodyText = await profileRes.text();
       console.error("Profile fetch failed with status", profileRes.status, profileRes.statusText, "body:", bodyText);
-      console.warn("Profile fetch failed, returning mock data");
-      return mockResponse();
+      return errorResponse(
+        `Spotify /me request failed with ${profileRes.status}: ${profileRes.statusText}`,
+        profileRes.status === 401 ? 401 : 500
+      );
     }
 
     const profile = await profileRes.json();
@@ -220,6 +216,6 @@ export async function GET(request) {
     return response;
   } catch (error) {
     console.error("Dashboard API unhandled error:", error);
-    return mockResponse();
+    return errorResponse("Unexpected server error in /api/dashboard", 500);
   }
 }

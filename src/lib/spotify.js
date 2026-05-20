@@ -6,8 +6,12 @@
 
 const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
 const BASE_URL = rawBaseUrl.replace(/\/$/, "");
-const REDIRECT_URI = `${BASE_URL}/api/auth/callback`;
+const DEFAULT_REDIRECT_URI = `${BASE_URL}/api/auth/callback`;
 const SCOPES = "user-read-private user-read-email user-top-read user-read-recently-played";
+
+export function buildRedirectUri(origin) {
+  return `${origin.replace(/\/$/, "")}/api/auth/callback`;
+}
 
 // ── PKCE helpers ──
 
@@ -43,7 +47,7 @@ export async function generatePKCE() {
 /**
  * Build the Spotify authorization URL with PKCE challenge.
  */
-export function getAuthUrl(codeChallenge) {
+export function getAuthUrl(codeChallenge, redirectUri = DEFAULT_REDIRECT_URI) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   if (!clientId) throw new Error("SPOTIFY_CLIENT_ID is not set");
 
@@ -51,7 +55,7 @@ export function getAuthUrl(codeChallenge) {
     response_type: "code",
     client_id: clientId,
     scope: SCOPES,
-    redirect_uri: REDIRECT_URI,
+    redirect_uri: redirectUri,
     code_challenge_method: "S256",
     code_challenge: codeChallenge,
   });
@@ -62,7 +66,7 @@ export function getAuthUrl(codeChallenge) {
 /**
  * Exchange an authorization code for access + refresh tokens.
  */
-export async function exchangeCode(code, codeVerifier) {
+export async function exchangeCode(code, codeVerifier, redirectUri = DEFAULT_REDIRECT_URI) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
@@ -73,7 +77,7 @@ export async function exchangeCode(code, codeVerifier) {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code,
-    redirect_uri: REDIRECT_URI,
+    redirect_uri: redirectUri,
     client_id: clientId,
     code_verifier: codeVerifier,
   });

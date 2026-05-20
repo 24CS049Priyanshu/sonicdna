@@ -5,11 +5,11 @@ import { generatePKCE, getAuthUrl } from "@/lib/spotify";
 // Ensure this route is never cached
 export const dynamic = "force-dynamic";
 
-const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
-const BASE_URL = rawBaseUrl.replace(/\/$/, "");
-
-export async function GET() {
+export async function GET(request) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const origin = new URL(request.url).origin;
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || origin;
+
 
   if (!clientId) {
     // No Spotify credentials — send user to dashboard (will show mock data)
@@ -19,7 +19,8 @@ export async function GET() {
 
   try {
     const { codeVerifier, codeChallenge } = await generatePKCE();
-    const authUrl = getAuthUrl(codeChallenge);
+    const redirectUri = `${origin}/api/auth/callback`;
+    const authUrl = getAuthUrl(codeChallenge, redirectUri);
 
     // Store code_verifier in HTTP-only cookie using next/headers
     const cookieStore = await cookies();

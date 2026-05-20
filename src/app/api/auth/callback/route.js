@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { exchangeCode } from "@/lib/spotify";
 
-const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
-const BASE_URL = rawBaseUrl.replace(/\/$/, "");
-
 export async function GET(request) {
+  const origin = new URL(request.url).origin;
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || origin;
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
@@ -31,7 +30,8 @@ export async function GET(request) {
   }
 
   try {
-    const tokenData = await exchangeCode(code, codeVerifier);
+    const redirectUri = `${origin}/api/auth/callback`;
+    const tokenData = await exchangeCode(code, codeVerifier, redirectUri);
 
     // Check for Spotify error in the token response body
     if (tokenData.error) {

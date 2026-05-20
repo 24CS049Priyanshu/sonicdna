@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, createContext, useContext } from "react";
 import Navbar from "@/components/Navbar";
-import { getMockDashboardData } from "@/lib/mockData";
 
 const DashboardContext = createContext(null);
 export const useDashboard = () => useContext(DashboardContext);
@@ -14,16 +13,16 @@ export default function DashboardLayout({ children }) {
     async function fetchData() {
       try {
         const res = await fetch("/api/dashboard");
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
+        const json = await res.json();
+        if (!res.ok) {
+          console.error("Dashboard API error:", json);
+          setData(null);
         } else {
-          // Fallback to mock data
-          setData(getMockDashboardData());
+          setData(json);
         }
-      } catch {
-        // Fallback to mock data
-        setData(getMockDashboardData());
+      } catch (error) {
+        console.error("Dashboard fetch failed:", error);
+        setData(null);
       } finally {
         setLoading(false);
       }

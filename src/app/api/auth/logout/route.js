@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 
-const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
-const BASE_URL = rawBaseUrl.replace(/\/$/, "");
-
-export async function GET() {
+export async function GET(request) {
+  const origin = new URL(request.url).origin;
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || origin;
   const response = NextResponse.redirect(new URL("/", BASE_URL));
 
   // Clear all auth cookies
