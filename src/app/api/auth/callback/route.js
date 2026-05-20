@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { exchangeCode } from "@/lib/spotify";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const BASE_URL = rawBaseUrl.replace(/\/$/, "");
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

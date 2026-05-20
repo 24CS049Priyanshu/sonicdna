@@ -4,7 +4,8 @@ import { generatePKCE, getAuthUrl } from "@/lib/spotify";
 // Ensure this route is never cached
 export const dynamic = "force-dynamic";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const BASE_URL = rawBaseUrl.replace(/\/$/, "");
 
 export async function GET() {
   const clientId = process.env.SPOTIFY_CLIENT_ID;

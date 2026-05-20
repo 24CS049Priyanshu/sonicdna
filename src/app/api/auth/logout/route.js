@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const BASE_URL = rawBaseUrl.replace(/\/$/, "");
 
 export async function GET() {
   const response = NextResponse.redirect(new URL("/", BASE_URL));

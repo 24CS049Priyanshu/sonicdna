@@ -4,7 +4,8 @@
 // and token refresh against the Spotify Accounts API.
 // ═══════════════════════════════════════════════
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const BASE_URL = rawBaseUrl.replace(/\/$/, "");
 const REDIRECT_URI = `${BASE_URL}/api/auth/callback`;
 const SCOPES = "user-read-private user-read-email user-top-read user-read-recently-played";
 
