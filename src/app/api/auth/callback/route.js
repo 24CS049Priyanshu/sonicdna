@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { exchangeCode } from "@/lib/spotify";
 
 const rawBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
@@ -22,7 +23,8 @@ export async function GET(request) {
   }
 
   // ── Retrieve the PKCE code_verifier from the cookie ──
-  const codeVerifier = request.cookies.get("spotify_code_verifier")?.value;
+  const cookieStore = await cookies();
+  const codeVerifier = cookieStore.get("spotify_code_verifier")?.value;
   if (!codeVerifier) {
     console.error("No code_verifier cookie found — session may have expired");
     return NextResponse.redirect(new URL("/?error=session_expired", BASE_URL));
@@ -40,9 +42,7 @@ export async function GET(request) {
     }
 
     // ── Success! Store tokens and redirect to dashboard ──
-    const response = NextResponse.redirect(new URL("/dashboard", BASE_URL));
-
-    response.cookies.set("spotify_access_token", tokenData.access_token, {
+    cookieStore.set("spotify_access_token", tokenData.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -51,7 +51,7 @@ export async function GET(request) {
     });
 
     if (tokenData.refresh_token) {
-      response.cookies.set("spotify_refresh_token", tokenData.refresh_token, {
+      cookieStore.set("spotify_refresh_token", tokenData.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -61,7 +61,7 @@ export async function GET(request) {
     }
 
     // Clear the code verifier — it's single-use
-    response.cookies.set("spotify_code_verifier", "", {
+    cookieStore.set("spotify_code_verifier", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -69,7 +69,7 @@ export async function GET(request) {
       path: "/",
     });
 
-    return response;
+    return NextResponse.redirect(new URL("/dashboard", BASE_URL));
   } catch (err) {
     console.error("Callback token exchange error:", err);
     return NextResponse.redirect(new URL("/?error=token_exchange_failed", BASE_URL));
