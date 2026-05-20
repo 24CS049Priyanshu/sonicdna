@@ -1,40 +1,41 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════
-   SONICDNA — Design System
-   Dark theme • Glassmorphism • Neon accents
+   SONICDNA — Premium Design System
+   Cinematic Dark Mode • Linear/Apple Aesthetic
    ═══════════════════════════════════════════════ */
 
 @theme inline {
-  --color-background: #050505;
-  --color-foreground: #e5e5e5;
+  --color-background: #000000; /* True black for ultimate contrast */
+  --color-foreground: #FFFFFF; /* True white for high contrast */
   --color-sonic-green: #1DB954;
   --color-sonic-green-dim: #1aa34a;
   --color-sonic-dark: #050505;
-  --color-sonic-card: rgba(255, 255, 255, 0.04);
-  --color-sonic-card-hover: rgba(255, 255, 255, 0.08);
+  --color-sonic-card: rgba(255, 255, 255, 0.02);
+  --color-sonic-card-hover: rgba(255, 255, 255, 0.05);
   --color-sonic-border: rgba(255, 255, 255, 0.08);
   --color-sonic-purple: #8B5CF6;
   --color-sonic-cyan: #06B6D4;
   --color-sonic-pink: #EC4899;
   --color-sonic-orange: #F97316;
-  --color-sonic-text-muted: #a3a3a3;
+  --color-sonic-text-muted: #A1A1AA; /* Zinc 400 for beautiful secondary text */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* ─── Base ─── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  scrollbar-color: rgba(255,255,255,0.05) transparent;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--color-background);
 }
 
 body {
@@ -42,15 +43,20 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Animated Mesh Gradient Background ─── */
+/* ─── Premium Background System ─── */
 .mesh-gradient {
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  /* Push background back so cards pop */
+  mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
 }
 
 .mesh-gradient::before,
@@ -58,142 +64,165 @@ body {
   content: '';
   position: absolute;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.3;
+  filter: blur(160px);
+  opacity: 0.1; /* Further reduced for atmospheric subtlety */
+  will-change: transform;
 }
 
 .mesh-gradient::before {
-  width: 600px;
-  height: 600px;
+  width: 700px;
+  height: 700px;
   background: radial-gradient(circle, #1DB954 0%, transparent 70%);
-  top: -10%;
-  left: -5%;
-  animation: meshFloat1 20s ease-in-out infinite;
+  top: -20%;
+  left: -10%;
+  animation: meshFloat1 30s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .mesh-gradient::after {
-  width: 500px;
-  height: 500px;
+  width: 600px;
+  height: 600px;
   background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);
-  bottom: -10%;
-  right: -5%;
-  animation: meshFloat2 25s ease-in-out infinite;
+  bottom: -20%;
+  right: -10%;
+  animation: meshFloat2 40s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .mesh-gradient-extra {
   position: fixed;
-  width: 400px;
-  height: 400px;
+  width: 500px;
+  height: 500px;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.2;
+  filter: blur(120px);
+  opacity: 0.1;
   background: radial-gradient(circle, #06B6D4 0%, transparent 70%);
-  top: 40%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation: meshFloat3 18s ease-in-out infinite;
+  animation: meshFloat3 35s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
 }
 
-/* Noise overlay for premium texture */
+/* Ultra-subtle cinematic grain */
 .noise-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.035; /* Slightly increased for better texture */
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
 
 @keyframes meshFloat1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(80px, 60px) scale(1.1); }
-  50% { transform: translate(30px, 120px) scale(0.95); }
-  75% { transform: translate(-40px, 40px) scale(1.05); }
+  33% { transform: translate(100px, 80px) scale(1.1); }
+  66% { transform: translate(-50px, 150px) scale(0.9); }
 }
 
 @keyframes meshFloat2 {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(-60px, -40px) scale(1.05); }
-  50% { transform: translate(-20px, -80px) scale(1.1); }
-  75% { transform: translate(50px, -30px) scale(0.95); }
+  33% { transform: translate(-80px, -60px) scale(1.15); }
+  66% { transform: translate(40px, -120px) scale(0.95); }
 }
 
 @keyframes meshFloat3 {
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  33% { transform: translate(-40%, -60%) scale(1.15); }
-  66% { transform: translate(-60%, -40%) scale(0.9); }
+  50% { transform: translate(-45%, -55%) scale(1.1); }
 }
 
-/* ─── Glassmorphism ─── */
+/* ─── Premium Glassmorphism ─── */
 .glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(24px); /* high blur */
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  box-shadow: 
+    0 4px 24px -1px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05); /* Inner top highlight */
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 .glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 
+    0 12px 32px -4px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.02),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
+/* Navbar (sticky full-width) */
 .glass-nav {
   background: rgba(5, 5, 5, 0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
-/* ─── Neon Glows ─── */
-.glow-green {
-  box-shadow: 0 0 20px rgba(29, 185, 84, 0.3),
-              0 0 60px rgba(29, 185, 84, 0.1);
+/* Floating Navbar (island variant) */
+.glass-nav-floating {
+  background: rgba(10, 10, 10, 0.65);
+  backdrop-filter: blur(32px) saturate(150%);
+  -webkit-backdrop-filter: blur(32px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 99px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.glow-purple {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3),
-              0 0 60px rgba(139, 92, 246, 0.1);
+/* ─── Cinematic Lighting Focus ─── */
+.cinematic-glow-layer {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+  will-change: opacity, transform;
 }
 
-.glow-cyan {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3),
-              0 0 60px rgba(6, 182, 212, 0.1);
+/* ─── Typography Polish ─── */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.03em; /* Tight kerning for premium feel */
 }
 
-/* ─── Gradient Text ─── */
 .gradient-text {
-  background: linear-gradient(135deg, #1DB954 0%, #1ed760 50%, #06B6D4 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #A1A1AA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-hero {
+  background: linear-gradient(135deg, #FFFFFF 20%, #1DB954 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-purple {
-  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+  background: linear-gradient(135deg, #FFFFFF 20%, #8B5CF6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ─── Skeleton Loader ─── */
+/* ─── Loading Skeletons (Polished) ─── */
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04) 0%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 100%
+    rgba(255, 255, 255, 0.01) 0%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(255, 255, 255, 0.01) 100%
   );
   background-size: 200% 100%;
-  animation: skeletonShimmer 1.5s ease-in-out infinite;
-  border-radius: 8px;
+  animation: skeletonShimmer 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  border-radius: 12px;
+  filter: blur(2px); /* Cinematic blurred placeholders */
 }
 
 @keyframes skeletonShimmer {
@@ -201,93 +230,104 @@ body {
   100% { background-position: -200% 0; }
 }
 
-/* ─── Pulse Glow (for CTA) ─── */
-.pulse-glow {
-  animation: pulseGlow 2s ease-in-out infinite;
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(29, 185, 84, 0.4),
-                0 0 40px rgba(29, 185, 84, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(29, 185, 84, 0.6),
-                0 0 60px rgba(29, 185, 84, 0.3);
-  }
-}
-
-/* ─── Heatmap Cell ─── */
+/* ─── Heatmap & Radar ─── */
 .heatmap-cell {
-  border-radius: 3px;
-  transition: all 0.2s ease;
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .heatmap-cell:hover {
-  transform: scale(1.5);
+  transform: scale(1.8);
   z-index: 10;
+  box-shadow: 0 0 12px rgba(29, 185, 84, 0.6);
+}
+
+.radar-polygon {
+  filter: drop-shadow(0 0 8px rgba(29, 185, 84, 0.4));
+}
+
+/* ─── Aura Orb (Cinematic) ─── */
+.aura-orb-layer {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform, filter;
+}
+
+@keyframes auraBreathe {
+  0%, 100% { transform: scale(1); filter: blur(40px); }
+  50% { transform: scale(1.1); filter: blur(50px); }
 }
 
 /* ─── Typewriter Animation ─── */
 .typewriter-cursor::after {
-  content: '|';
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background-color: #FAFAFA;
+  margin-left: 4px;
+  vertical-align: middle;
   animation: blink 1s step-end infinite;
-  color: #1DB954;
-  font-weight: 300;
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 /* ─── Spotify Button ─── */
 .spotify-btn {
-  background: #1DB954;
-  color: #000;
-  font-weight: 700;
-  padding: 14px 32px;
-  border-radius: 999px;
+  background: #FAFAFA;
+  color: #050505;
+  font-weight: 600;
+  padding: 16px 36px;
+  border-radius: 99px;
   font-size: 1rem;
-  letter-spacing: 0.02em;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.01em;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.1);
 }
 .spotify-btn:hover {
-  background: #1ed760;
-  transform: scale(1.05);
+  background: #FFFFFF;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
 }
 
-/* ─── Aura Orb ─── */
-.aura-orb {
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  filter: blur(40px);
-  animation: auraRotate 8s ease-in-out infinite;
-}
-
-@keyframes auraRotate {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(90deg) scale(1.05); }
-  50% { transform: rotate(180deg) scale(0.95); }
-  75% { transform: rotate(270deg) scale(1.03); }
-}
-
-/* ─── Responsive Chart Container ─── */
-.chart-container {
-  width: 100%;
-  min-height: 300px;
-}
-
-/* ─── Section Spacing ─── */
+/* ─── Dashboard Sections (Scene separation) ─── */
 .dashboard-section {
-  margin-bottom: 3rem;
+  position: relative;
+  margin-bottom: 8rem; /* Increased vertical spacing */
+  padding-top: 4rem; /* Adds to the scene transition feel */
 }
 
-@media (min-width: 768px) {
-  .dashboard-section {
-    margin-bottom: 4rem;
+.dashboard-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+/* Atmospheric glow behind major sections */
+.dashboard-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50vw;
+  height: 200px;
+  background: radial-gradient(ellipse at top, rgba(255,255,255,0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (max-width: 768px) {
+  .dashboard-section { 
+    margin-bottom: 6rem; 
+    padding-top: 3rem;
   }
+  .dashboard-section::before { left: 5%; right: 5%; }
 }
