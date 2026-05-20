@@ -5,15 +5,11 @@ import { useMemo } from "react";
 const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function ListeningHeatmap({ data }) {
-  // data is a 7×24 grid (days × hours)
   const { grid, maxVal } = useMemo(() => {
     if (!data || data.length === 0) {
-      // Generate sample data
-      const g = Array.from({ length: 7 }, () =>
-        Array.from({ length: 24 }, () => Math.floor(Math.random() * 5))
-      );
-      const max = Math.max(...g.flat());
-      return { grid: g, maxVal: max || 1 };
+      // Empty grid fallback to prevent hydration errors
+      const g = Array.from({ length: 7 }, () => Array(24).fill(0));
+      return { grid: g, maxVal: 1 };
     }
     const max = Math.max(...data.flat());
     return { grid: data, maxVal: max || 1 };
