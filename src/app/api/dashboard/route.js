@@ -17,12 +17,13 @@ async function safeFetchSpotify(endpoint, accessToken) {
       cache: "no-store",
     });
     if (!res.ok) {
-      console.warn(`Spotify ${endpoint} returned ${res.status}`);
+      const errorBody = await res.text();
+      console.error(`Spotify ${endpoint} returned ${res.status} ${res.statusText}:`, errorBody);
       return { items: [] };
     }
     return await res.json();
   } catch (err) {
-    console.error(`Spotify fetch error for ${endpoint}:`, err.message);
+    console.error(`Spotify fetch error for ${endpoint}:`, err?.message || err);
     return { items: [] };
   }
 }
@@ -87,17 +88,27 @@ export async function GET(request) {
     const refreshToken = request.cookies.get("spotify_refresh_token")?.value;
     let pendingCookies = [];
 
+    console.log("Dashboard token check:", {
+      hasAccessToken: !!accessToken,
+      accessTokenLength: accessToken?.length || 0,
+      hasRefreshToken: !!refreshToken,
+      refreshTokenLength: refreshToken?.length || 0,
+    });
+
     // ── If no access token but we have a refresh token, try refreshing ──
     if (!accessToken && refreshToken) {
+      console.warn("No access token present, attempting refresh using refresh token");
       const refreshed = await tryRefreshToken(refreshToken);
       if (refreshed) {
         accessToken = refreshed.accessToken;
         pendingCookies = refreshed.cookies;
+      } else {
+        console.error("Refresh token exchange failed or returned no access token");
       }
     }
 
-    // ── No tokens at all → return mock data ──
     if (!accessToken) {
+      console.error("No Spotify access token available in /api/dashboard. Cannot fetch user data.");
       return mockResponse();
     }
 
@@ -120,8 +131,10 @@ export async function GET(request) {
       }
     }
 
-    // ── Still failing? Fall back to mock ──
+    // ── Still failing? Log full response body and fall back to mock ──
     if (!profileRes.ok) {
+      const bodyText = await profileRes.text();
+      console.error("Profile fetch failed with status", profileRes.status, profileRes.statusText, "body:", bodyText);
       console.warn("Profile fetch failed, returning mock data");
       return mockResponse();
     }

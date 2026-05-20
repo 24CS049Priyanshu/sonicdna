@@ -60,6 +60,13 @@ export async function GET(request) {
       });
     }
 
+    console.log("Spotify callback success:", {
+      hasAccessToken: !!tokenData.access_token,
+      accessTokenLength: tokenData.access_token?.length || 0,
+      hasRefreshToken: !!tokenData.refresh_token,
+      refreshTokenLength: tokenData.refresh_token?.length || 0,
+    });
+
     // Clear the code verifier — it's single-use
     cookieStore.set("spotify_code_verifier", "", {
       httpOnly: true,
