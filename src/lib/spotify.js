@@ -10,7 +10,8 @@ const DEFAULT_REDIRECT_URI = `${BASE_URL}/api/auth/callback`;
 const SCOPES = "user-read-private user-read-email user-top-read user-read-recently-played";
 
 export function buildRedirectUri(origin) {
-  return `${origin.replace(/\/$/, "")}/api/auth/callback`;
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || origin).replace(/\/$/, "");
+  return `${baseUrl}/api/auth/callback`;
 }
 
 // ── PKCE helpers ──

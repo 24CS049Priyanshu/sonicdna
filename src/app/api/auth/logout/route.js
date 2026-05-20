@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(request) {
   const origin = new URL(request.url).origin;
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || origin;
+  const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || origin).replace(/\/$/, "");
   const response = NextResponse.redirect(new URL("/", BASE_URL));
 
   // Clear all auth cookies

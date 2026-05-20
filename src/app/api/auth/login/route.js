@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const origin = new URL(request.url).origin;
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || origin;
+  const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || origin).replace(/\/$/, "");
 
 
   if (!clientId) {
@@ -19,7 +19,7 @@ export async function GET(request) {
 
   try {
     const { codeVerifier, codeChallenge } = await generatePKCE();
-    const redirectUri = `${origin}/api/auth/callback`;
+    const redirectUri = `${BASE_URL}/api/auth/callback`;
     const authUrl = getAuthUrl(codeChallenge, redirectUri);
 
     // Store code_verifier in HTTP-only cookie using next/headers

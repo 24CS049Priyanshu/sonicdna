@@ -4,7 +4,7 @@ import { exchangeCode } from "@/lib/spotify";
 
 export async function GET(request) {
   const origin = new URL(request.url).origin;
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || origin;
+  const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || origin).replace(/\/$/, "");
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
@@ -30,7 +30,7 @@ export async function GET(request) {
   }
 
   try {
-    const redirectUri = `${origin}/api/auth/callback`;
+    const redirectUri = `${BASE_URL}/api/auth/callback`;
     const tokenData = await exchangeCode(code, codeVerifier, redirectUri);
 
     // Check for Spotify error in the token response body
