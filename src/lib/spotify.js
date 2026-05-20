@@ -1,12 +1,19 @@
 // ═══════════════════════════════════════════════
 // SonicDNA — Spotify OAuth PKCE Utilities
-// Handles secure authorization, token exchange,
-// and token refresh against the Spotify Accounts API.
+// Single source of truth for redirect_uri — used
+// identically in BOTH getAuthUrl and exchangeCode.
 // ═══════════════════════════════════════════════
 
-// Single source of truth — never derive redirect_uri twice
-const REDIRECT_URI = "https://sonicdna.vercel.app/api/auth/callback";
 const SCOPES = "user-read-private user-read-email user-top-read user-read-recently-played";
+
+/**
+ * Always returns the canonical production redirect URI.
+ * Derived once here, used everywhere — never re-derived from request headers.
+ */
+function getRedirectUri() {
+  const base = (process.env.NEXT_PUBLIC_BASE_URL || "https://sonicdna.vercel.app").replace(/\/$/, "");
+  return `${base}/api/auth/callback`;
+}
 
 // ── PKCE helpers ──
 
@@ -41,19 +48,20 @@ export async function generatePKCE() {
 
 /**
  * Build the Spotify authorization URL with PKCE challenge.
- * Uses the single REDIRECT_URI constant — never overridden.
+ * Uses getRedirectUri() — the single source of truth.
  */
 export function getAuthUrl(codeChallenge) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   if (!clientId) throw new Error("SPOTIFY_CLIENT_ID is not set");
 
-  console.log("[getAuthUrl] redirect_uri =", REDIRECT_URI);
+  const redirectUri = getRedirectUri();
+  console.log("[getAuthUrl] redirect_uri =", redirectUri);
 
   const params = new URLSearchParams({
     response_type: "code",
     client_id: clientId,
     scope: SCOPES,
-    redirect_uri: REDIRECT_URI,  // ← single source of truth
+    redirect_uri: redirectUri,     // ← single source of truth
     code_challenge_method: "S256",
     code_challenge: codeChallenge,
   });
@@ -63,7 +71,7 @@ export function getAuthUrl(codeChallenge) {
 
 /**
  * Exchange an authorization code for access + refresh tokens.
- * Uses the SAME REDIRECT_URI constant as getAuthUrl — byte-for-byte identical.
+ * Uses getRedirectUri() — IDENTICAL to getAuthUrl — byte-for-byte match guaranteed.
  */
 export async function exchangeCode(code, codeVerifier) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -73,21 +81,24 @@ export async function exchangeCode(code, codeVerifier) {
     throw new Error("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not set");
   }
 
-  console.log("[exchangeCode] redirect_uri =", REDIRECT_URI);
+  const redirectUri = getRedirectUri();
+  console.log("[exchangeCode] redirect_uri =", redirectUri);
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code,
-    redirect_uri: REDIRECT_URI,  // ← must be identical to getAuthUrl — using same constant
+    redirect_uri: redirectUri,     // ← identical to getAuthUrl — guaranteed by using same function
     client_id: clientId,
     code_verifier: codeVerifier,
   });
+
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
   const res = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: "Basic " + Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
+      Authorization: `Basic ${credentials}`,
     },
     body: body.toString(),
   });
@@ -118,11 +129,13 @@ export async function refreshAccessToken(refreshToken) {
     client_id: clientId,
   });
 
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
   const res = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: "Basic " + Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
+      Authorization: `Basic ${credentials}`,
     },
     body: body.toString(),
   });
