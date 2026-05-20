@@ -117,5 +117,5 @@ export const mockPersonality = {
 };
 
 export function getMockDashboardData() {
-  return { profile: mockProfile, artists: mockTopArtists, tracks: mockTopTracks, audioFeatures: mockAudioFeatures, recentlyPlayed: mockRecentlyPlayed, analytics: mockAnalytics };
+  return { profile: mockProfile, artists: mockTopArtists, tracks: mockTopTracks, audioFeatures: mockAudioFeatures, recentlyPlayed: mockRecentlyPlayed, analytics: mockAnalytics, isMock: true };
 }

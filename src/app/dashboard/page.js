@@ -13,6 +13,7 @@ import ListeningHeatmap from "@/components/ListeningHeatmap";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import Link from "next/link";
 import { computeHeatmapData } from "@/lib/analytics";
+import { getColorsForGenre } from "@/lib/colors";
 
 export default function DashboardPage() {
   const { data, loading } = useDashboard();
@@ -36,6 +37,10 @@ export default function DashboardPage() {
   const currentTracks = tracks?.[timeRange]?.items || [];
   const heatmapData = computeHeatmapData(recentlyPlayed);
 
+  const topGenre = analytics?.topGenre || "Pop";
+  const accentColors = getColorsForGenre(topGenre);
+  const primaryColor = accentColors[0];
+
   // Build audio feature map for tracks
   const audioMap = {};
   (audioFeatures || []).forEach((f) => { audioMap[f.id] = f; });
@@ -44,20 +49,29 @@ export default function DashboardPage() {
     <div className="space-y-8 md:space-y-12">
       {/* Profile Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="flex flex-col sm:flex-row items-start sm:items-center gap-4"
+        initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative"
       >
-        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-sonic-green to-sonic-cyan flex items-center justify-center text-2xl font-bold text-black overflow-hidden">
+        {/* Cinematic Focus Lighting behind hero */}
+        <div 
+          className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-[100px] opacity-20 pointer-events-none"
+          style={{ background: primaryColor }}
+        />
+
+        <div 
+          className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-2xl font-bold text-black overflow-hidden border border-white/10 relative z-10"
+          style={{ background: `linear-gradient(135deg, ${accentColors[0]}, ${accentColors[1]})` }}
+        >
           {profile?.images?.[0]?.url ? (
             <img src={profile.images[0].url} alt="" className="w-full h-full object-cover" />
           ) : (
             profile?.display_name?.charAt(0) || "S"
           )}
         </div>
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">
+        <div className="relative z-10">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
             Welcome back, <span className="gradient-text">{profile?.display_name || "Music Lover"}</span>
           </h1>
           <p className="text-sonic-text-muted mt-1">Here&apos;s your music DNA decoded</p>
@@ -96,9 +110,15 @@ export default function DashboardPage() {
       </div>
 
       {/* Top Artists */}
-      <section className="dashboard-section">
+      <motion.section 
+        initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.7 }}
+        className="dashboard-section"
+      >
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Users size={20} className="text-sonic-green" />
+          <Users size={20} style={{ color: primaryColor }} />
           Top Artists
         </h3>
 
@@ -138,12 +158,18 @@ export default function DashboardPage() {
             <ArtistCard key={artist.id} artist={artist} rank={i + 2} delay={i * 0.05} />
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* Top Tracks */}
-      <section className="dashboard-section">
+      <motion.section 
+        initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.7 }}
+        className="dashboard-section"
+      >
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Music size={20} className="text-sonic-purple" />
+          <Music size={20} style={{ color: accentColors[1] || "#8B5CF6" }} />
           Top Tracks
         </h3>
         <div className="flex flex-col gap-2">
@@ -157,7 +183,7 @@ export default function DashboardPage() {
             />
           ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* Charts Row */}
       <section className="dashboard-section">
@@ -201,14 +227,20 @@ export default function DashboardPage() {
       </section>
 
       {/* AI Personality Teaser */}
-      <section className="dashboard-section">
+      <motion.section 
+        initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.7 }}
+        className="dashboard-section"
+      >
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card p-6 md:p-8 relative overflow-hidden"
+          whileHover={{ scale: 1.01 }}
+          className="glass-card p-6 md:p-8 relative overflow-hidden group"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-sonic-purple/5 to-sonic-cyan/5" />
+          {/* Animated Gradient Glow */}
+          <div className="absolute inset-0 bg-gradient-to-r opacity-5 group-hover:opacity-10 transition-opacity duration-500" 
+               style={{ backgroundImage: `linear-gradient(to right, ${primaryColor}, ${accentColors[1] || '#8B5CF6'})` }} />
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -231,7 +263,7 @@ export default function DashboardPage() {
             </Link>
           </div>
         </motion.div>
-      </section>
+      </motion.section>
     </div>
   );
 }

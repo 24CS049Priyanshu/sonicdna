@@ -106,6 +106,6 @@ export function computeAllAnalytics(artists, tracks, audioFeatures, recentlyPlay
     moodLabel: mood.label,
     moodColor: mood.color,
     auraColors,
-    listeningHours: Math.round(Math.random() * 200 + 100),
+    listeningHours: Math.round(((tracks?.items || []).length * 3.5) + 120),
   };
 }
