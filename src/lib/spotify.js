@@ -4,12 +4,9 @@
 // and token refresh against the Spotify Accounts API.
 // ═══════════════════════════════════════════════
 
-const DEFAULT_REDIRECT_URI = "https://sonicdna.vercel.app/api/auth/callback";
+// Single source of truth — never derive redirect_uri twice
+const REDIRECT_URI = "https://sonicdna.vercel.app/api/auth/callback";
 const SCOPES = "user-read-private user-read-email user-top-read user-read-recently-played";
-
-export function buildRedirectUri() {
-  return DEFAULT_REDIRECT_URI;
-}
 
 // ── PKCE helpers ──
 
@@ -44,16 +41,19 @@ export async function generatePKCE() {
 
 /**
  * Build the Spotify authorization URL with PKCE challenge.
+ * Uses the single REDIRECT_URI constant — never overridden.
  */
-export function getAuthUrl(codeChallenge, redirectUri = DEFAULT_REDIRECT_URI) {
+export function getAuthUrl(codeChallenge) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   if (!clientId) throw new Error("SPOTIFY_CLIENT_ID is not set");
+
+  console.log("[getAuthUrl] redirect_uri =", REDIRECT_URI);
 
   const params = new URLSearchParams({
     response_type: "code",
     client_id: clientId,
     scope: SCOPES,
-    redirect_uri: redirectUri,
+    redirect_uri: REDIRECT_URI,  // ← single source of truth
     code_challenge_method: "S256",
     code_challenge: codeChallenge,
   });
@@ -63,8 +63,9 @@ export function getAuthUrl(codeChallenge, redirectUri = DEFAULT_REDIRECT_URI) {
 
 /**
  * Exchange an authorization code for access + refresh tokens.
+ * Uses the SAME REDIRECT_URI constant as getAuthUrl — byte-for-byte identical.
  */
-export async function exchangeCode(code, codeVerifier, redirectUri = DEFAULT_REDIRECT_URI) {
+export async function exchangeCode(code, codeVerifier) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
@@ -72,10 +73,12 @@ export async function exchangeCode(code, codeVerifier, redirectUri = DEFAULT_RED
     throw new Error("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not set");
   }
 
+  console.log("[exchangeCode] redirect_uri =", REDIRECT_URI);
+
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code,
-    redirect_uri: redirectUri,
+    redirect_uri: REDIRECT_URI,  // ← must be identical to getAuthUrl — using same constant
     client_id: clientId,
     code_verifier: codeVerifier,
   });
@@ -89,13 +92,13 @@ export async function exchangeCode(code, codeVerifier, redirectUri = DEFAULT_RED
     body: body.toString(),
   });
 
+  const responseText = await res.text();
   if (!res.ok) {
-    const errorBody = await res.text();
-    console.error(`Token exchange failed (${res.status}):`, errorBody);
-    throw new Error(`Token exchange failed: ${res.status}`);
+    console.error(`[exchangeCode] Token exchange failed (${res.status}):`, responseText);
+    throw new Error(`Token exchange failed: ${res.status} — ${responseText}`);
   }
 
-  return res.json();
+  return JSON.parse(responseText);
 }
 
 /**
@@ -126,7 +129,7 @@ export async function refreshAccessToken(refreshToken) {
 
   if (!res.ok) {
     const errorBody = await res.text();
-    console.error(`Token refresh failed (${res.status}):`, errorBody);
+    console.error(`[refreshAccessToken] Token refresh failed (${res.status}):`, errorBody);
     throw new Error(`Token refresh failed: ${res.status}`);
   }
 
