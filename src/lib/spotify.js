@@ -1,7 +1,17 @@
-// Spotify OAuth Utilities
+// ═══════════════════════════════════════════════
+// SonicDNA — Spotify OAuth PKCE Utilities
+// Handles secure authorization, token exchange,
+// and token refresh against the Spotify Accounts API.
+// ═══════════════════════════════════════════════
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000";
+const REDIRECT_URI = `${BASE_URL}/api/auth/callback`;
+const SCOPES = "user-read-private user-read-email user-top-read user-read-recently-played";
+
+// ── PKCE helpers ──
 
 function generateRandomString(length) {
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-~";
   const values = crypto.getRandomValues(new Uint8Array(length));
   return values.reduce((acc, x) => acc + possible[x % possible.length], "");
 }
@@ -12,30 +22,35 @@ async function sha256(plain) {
   return await crypto.subtle.digest("SHA-256", data);
 }
 
-function base64encode(input) {
-  return btoa(String.fromCharCode(...new Uint8Array(input)))
-    .replace(/=/g, "")
+function base64urlEncode(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
     .replace(/\+/g, "-")
-    .replace(/\//g, "_");
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
+/**
+ * Generate a PKCE code_verifier and code_challenge pair.
+ */
 export async function generatePKCE() {
   const codeVerifier = generateRandomString(64);
   const hashed = await sha256(codeVerifier);
-  const codeChallenge = base64encode(hashed);
+  const codeChallenge = base64urlEncode(hashed);
   return { codeVerifier, codeChallenge };
 }
 
+/**
+ * Build the Spotify authorization URL with PKCE challenge.
+ */
 export function getAuthUrl(codeChallenge) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000"}/api/auth/callback`;
-  const scopes = "user-read-private user-read-email user-top-read user-read-recently-played";
+  if (!clientId) throw new Error("SPOTIFY_CLIENT_ID is not set");
 
   const params = new URLSearchParams({
     response_type: "code",
     client_id: clientId,
-    scope: scopes,
-    redirect_uri: redirectUri,
+    scope: SCOPES,
+    redirect_uri: REDIRECT_URI,
     code_challenge_method: "S256",
     code_challenge: codeChallenge,
   });
@@ -43,15 +58,21 @@ export function getAuthUrl(codeChallenge) {
   return `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
+/**
+ * Exchange an authorization code for access + refresh tokens.
+ */
 export async function exchangeCode(code, codeVerifier) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-  const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || "http://127.0.0.1:3000"}/api/auth/callback`;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not set");
+  }
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code,
-    redirect_uri: redirectUri,
+    redirect_uri: REDIRECT_URI,
     client_id: clientId,
     code_verifier: codeVerifier,
   });
@@ -65,12 +86,25 @@ export async function exchangeCode(code, codeVerifier) {
     body: body.toString(),
   });
 
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error(`Token exchange failed (${res.status}):`, errorBody);
+    throw new Error(`Token exchange failed: ${res.status}`);
+  }
+
   return res.json();
 }
 
+/**
+ * Refresh an expired access token using a refresh token.
+ */
 export async function refreshAccessToken(refreshToken) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not set");
+  }
 
   const body = new URLSearchParams({
     grant_type: "refresh_token",
@@ -86,6 +120,12 @@ export async function refreshAccessToken(refreshToken) {
     },
     body: body.toString(),
   });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error(`Token refresh failed (${res.status}):`, errorBody);
+    throw new Error(`Token refresh failed: ${res.status}`);
+  }
 
   return res.json();
 }
