@@ -30,7 +30,7 @@ export async function GET(request) {
   }
 
   try {
-    const redirectUri = `${BASE_URL}/api/auth/callback`;
+    const redirectUri = "https://sonicdna.vercel.app/api/auth/callback";
     const tokenData = await exchangeCode(code, codeVerifier, redirectUri);
 
     // Check for Spotify error in the token response body

@@ -19,7 +19,7 @@ export async function GET(request) {
 
   try {
     const { codeVerifier, codeChallenge } = await generatePKCE();
-    const redirectUri = `${BASE_URL}/api/auth/callback`;
+    const redirectUri = "https://sonicdna.vercel.app/api/auth/callback";
     const authUrl = getAuthUrl(codeChallenge, redirectUri);
 
     // Store code_verifier in HTTP-only cookie using next/headers
