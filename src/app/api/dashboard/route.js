@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getMockDashboardData } from "@/lib/mockData";
 import { computeAllAnalytics } from "@/lib/analytics";
 import { refreshAccessToken } from "@/lib/spotify";
 
@@ -72,8 +73,10 @@ function applyCookies(response, cookieList) {
   }
 }
 
-function errorResponse(message, status = 401) {
-  return NextResponse.json({ error: true, message }, { status });
+function mockResponse() {
+  const mockData = getMockDashboardData();
+  mockData.isMock = true;
+  return NextResponse.json(mockData);
 }
 
 export async function GET(request) {
@@ -102,8 +105,8 @@ export async function GET(request) {
     }
 
     if (!accessToken) {
-      console.error("No Spotify access token available in /api/dashboard. Cannot fetch user data.");
-      return errorResponse("Missing Spotify access token. Ensure the callback stored cookies correctly.", 401);
+      console.error("No Spotify access token available in /api/dashboard. Returning mock data fallback.");
+      return mockResponse();
     }
 
     // ── Test the token by fetching profile ──
@@ -129,10 +132,8 @@ export async function GET(request) {
     if (!profileRes.ok) {
       const bodyText = await profileRes.text();
       console.error("Profile fetch failed with status", profileRes.status, profileRes.statusText, "body:", bodyText);
-      return errorResponse(
-        `Spotify /me request failed with ${profileRes.status}: ${profileRes.statusText}`,
-        profileRes.status === 401 ? 401 : 500
-      );
+      console.warn("Falling back to mock dashboard data due to Spotify profile fetch failure.");
+      return mockResponse();
     }
 
     const profile = await profileRes.json();
@@ -216,6 +217,6 @@ export async function GET(request) {
     return response;
   } catch (error) {
     console.error("Dashboard API unhandled error:", error);
-    return errorResponse("Unexpected server error in /api/dashboard", 500);
+    return mockResponse();
   }
 }
