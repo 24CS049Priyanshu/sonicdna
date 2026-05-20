@@ -15,7 +15,7 @@
 ---
 
 ## 🔗 Live Demo
-[https://sonicdna.vercel.app](https://sonicdna.vercel.app) *(Replace with your actual Vercel link)*
+https://sonicdna.vercel.app/
 
 ---
 
